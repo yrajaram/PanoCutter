@@ -1,5 +1,6 @@
 package com.herakles.photo;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class DiceImage {
-	static final int RequiredScaleFactor = 3;
+	static final int RequiredScaleFactor = 1;
 
     public static void main(String[] args) throws IOException {
     	/*
@@ -43,8 +44,6 @@ public class DiceImage {
         	scaleFactor = picLength/((float)Length5x7);
         }
         
-        System.out.println("Scale Factor:"+scaleFactor+" "+(int)scaleFactor);
-
         if (scaleFactor>=1){
         	image = scaleImage(image, RequiredScaleFactor*((float)((int)scaleFactor)/scaleFactor));
         }    else {
@@ -54,40 +53,29 @@ public class DiceImage {
         int rows = image.getHeight()/Height5x7; 
         int cols = image.getWidth()/Length5x7;
         
-        rows=((image.getHeight() % Height5x7)!=0)?++rows:rows;
-        cols = ((image.getWidth()%Length5x7)!=0)?++cols:cols;
-        
-        int chunks = rows * cols;
-
-        System.out.println("Height:"+image.getHeight()+" "+Height5x7);
-        System.out.println("Length:"+image.getWidth()+" "+Length5x7);
-        
+        rows = ((image.getHeight() % Height5x7)!=0)?++rows:rows;
+        cols = ((image.getWidth() % Length5x7)!=0)?++cols:cols;
+                
         System.out.println("Rows:"+rows+" Cols:"+cols);
            
-        int count = 0;
-        BufferedImage imgs[] = new BufferedImage[chunks]; //Image array to hold image chunks
+        BufferedImage img = new BufferedImage(Length5x7, Height5x7, image.getType());
+        Graphics2D gr = null;
+        gr = img.createGraphics();
+    	
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                //Initialize the image array with image chunks
-                imgs[count] = new BufferedImage(Length5x7, Height5x7, image.getType());
-
-                // draws the image chunk
-                Graphics2D gr = imgs[count++].createGraphics();
+            	if (y == cols-1) {
+            		gr.clearRect(0, 0, Length5x7, Length5x7);
+            	}
                 gr.drawImage(image, 0, 0, Length5x7, Height5x7, Length5x7 * y, Height5x7 * x, Length5x7 * y + Length5x7, Height5x7 * x + Height5x7, null);
-                gr.dispose();
+                ImageIO.write(img, "jpg", new File(file.getName().substring(0, file.getName().indexOf("."))+"-tile-" + x + y + ".jpg"));
             }
         }
+        gr.dispose();
         System.out.println("Diced");
-
-        //write chunks as jpgs
-        for (int i = 0; i < imgs.length; i++) {
-            ImageIO.write(imgs[i], "jpg", new File(file.getName().substring(0, file.getName().indexOf("."))+"-tile-" + i + ".jpg"));
-        }
-        System.out.println("Tile images created");
     }
     
     static BufferedImage scaleImage(BufferedImage before, float scale) {
-    	System.out.println("Scale:"+scale);
     	int w = (int) (before.getWidth()*scale);
     	int h = (int) (before.getHeight()*scale);
     	BufferedImage after = new BufferedImage(w, h, before.getType());
@@ -95,7 +83,7 @@ public class DiceImage {
     	at.scale(scale, scale);
     	AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
     	after = scaleOp.filter(before, after);
-    	System.out.println("Scaled from "+before.getHeight()+" to "+after.getHeight());
+    	System.out.println("Scaled from "+before.getHeight()+"px to "+after.getHeight()+"px");
     	return after;
     }
 }
