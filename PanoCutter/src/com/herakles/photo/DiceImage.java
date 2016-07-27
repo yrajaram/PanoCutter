@@ -11,22 +11,23 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class DiceImage {
+	static final int RequiredScaleFactor = 3;
+
     public static void main(String[] args) throws IOException {
     	/*
     	 * from: http://www.montclairphoto.com/resolution.html
     	 * 
     	 * Our Frontier print sizes are set slightly above 300 dpi:
-			size    -     pixels
-			3.5x5 - 1050x1524
-			4x5.4 - 1228x1654
-			4x6 - 1228x1818
-			5x7 - 1524x2138
-			8x10 - 2436x3036
-			8x12 - 2434x3638
-			10x15 - 3036x4536
+			size	-	pixels
+			3.5x5	-	1050x1524
+			4x5.4	-	1228x1654
+			4x6		-	1228x1818
+			5x7		-	1524x2138
+			8x10	-	2436x3036
+			8x12	-	2434x3638
+			10x15	-	3036x4536
     	 */
     	int Height5x7 = 2138, Length5x7 = 1524; // Make a collage of 5x7 images
-    	
 
         File file = new File("SFO.jpg");
         FileInputStream fis = new FileInputStream(file);
@@ -44,9 +45,11 @@ public class DiceImage {
         
         System.out.println("Scale Factor:"+scaleFactor+" "+(int)scaleFactor);
 
-        if (scaleFactor!=1){
-        	image = scaleImage(image, ((float)((int)scaleFactor)/scaleFactor));
-        }    
+        if (scaleFactor>=1){
+        	image = scaleImage(image, RequiredScaleFactor*((float)((int)scaleFactor)/scaleFactor));
+        }    else {
+        	image = scaleImage(image, RequiredScaleFactor/scaleFactor);
+        }
 
         int rows = image.getHeight()/Height5x7; 
         int cols = image.getWidth()/Length5x7;
